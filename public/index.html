@@ -4,18 +4,43 @@
         <meta charset="utf-8">
         <title>Chat</title>
         <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.1/angular.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.1/angular-animate.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.1/angular-aria.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angular_material/0.10.0/angular-material.min.js"></script>
         <script src="js/main.js"></script>
+        <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/0.10.0/angular-material.min.css">
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
     </head>
     <body ng-controller="ChatController">
-        <a ng-show="!loggedIn" href="{{loginUri}}">Log in</a>
-        <section ng-show="loggedIn">
-            <p>Logged in as {{user.name}}.</p>
-            <h2>List of registered users</h2>
-            <ul>
-                <li ng-repeat="user in users">
-                    {{user.name}}
-                </li>
-            </ul>
-        </section>
+    <md-button class="md-raised md-primary" ng-show="!loggedIn" href="{{loginUri}}">Log in</md-button>
+
+    <section ng-show="loggedIn" layout="row">
+        <md-sidenav flex class="md-sidenav-left md-whiteframe-z3" md-component-id="left" md-is-locked-open="$mdMedia('gt-md')">
+            <md-toolbar>
+                <p>Logged in as {{user.name }}</p>
+            </md-toolbar>
+            <md-subheader>List of registered users</md-subheader>
+            <md-list>
+                <md-list-item ng-repeat="user in users" ng-click="openChat(user)">
+                    {{user.name || user.id}}
+                    <md-icon class="material-icons">question_answer</md-icon>
+                    <md-divider ng-if="!$last"></md-divider>
+                </md-list-item>
+            </md-list>
+        </md-sidenav>
+        <md-content flex>
+            <md-toolbar>
+                <p>Chat with USER</p>
+            </md-toolbar>
+        <div>
+            <p>
+                HELLO WORLD
+            </p>
+        </div>
+        </md-content>
+    </section>
+
     </body>
 </html>
+
