@@ -1,46 +1,63 @@
 <!DOCTYPE html>
 <html lang="en" ng-app="ChatApp">
-    <head>
-        <meta charset="utf-8">
-        <title>Chat</title>
-        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.1/angular.min.js"></script>
-        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.1/angular-animate.min.js"></script>
-        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.1/angular-aria.min.js"></script>
-        <script src="https://ajax.googleapis.com/ajax/libs/angular_material/0.10.0/angular-material.min.js"></script>
-        <script src="js/main.js"></script>
-        <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/0.10.0/angular-material.min.css">
-        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-        <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
-    </head>
-    <body ng-controller="ChatController">
-    <md-button class="md-raised md-primary" ng-show="!loggedIn" href="{{loginUri}}">Log in</md-button>
+<head>
+    <meta charset="utf-8">
+    <title>Chat</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.1/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.1/angular-animate.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.1/angular-aria.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angular_material/0.10.0/angular-material.min.js"></script>
+    <script src="js/main.js"></script>
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/0.10.0/angular-material.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
+</head>
+<body ng-controller="ChatController">
+<md-button class="md-raised md-primary" ng-show="!loggedIn" href="{{loginUri}}">Log in</md-button>
 
-    <section ng-show="loggedIn" layout="row">
-        <md-sidenav flex class="md-sidenav-left md-whiteframe-z3" md-component-id="left" md-is-locked-open="$mdMedia('gt-md')">
+<section ng-show="loggedIn" layout="row">
+    <md-sidenav flex class="md-sidenav-left md-whiteframe-z3" md-component-id="left" md-is-locked-open="$mdMedia('gt-md')">
+        <md-content>
             <md-toolbar>
                 <p>Logged in as {{user.name }}</p>
             </md-toolbar>
             <md-subheader>List of registered users</md-subheader>
-            <md-list>
+            <md-list layout-padding>
                 <md-list-item ng-repeat="user in users" ng-click="openChat(user)">
-                    {{user.name || user.id}}
-                    <md-icon class="material-icons">question_answer</md-icon>
-                    <md-divider ng-if="!$last"></md-divider>
+                    <img ng-src="{{user.avatarUrl}}" class="md-avatar" alt="{{user.name || user.id}}" />
+                    <div class="md-list-item-text">
+                       {{user.name || user.id}}
+                    </div>
                 </md-list-item>
             </md-list>
-        </md-sidenav>
-        <md-content flex>
-            <md-toolbar>
-                <p>Chat with USER</p>
-            </md-toolbar>
-        <div>
-            <p>
-                HELLO WORLD
-            </p>
-        </div>
         </md-content>
-    </section>
+    </md-sidenav>
+    <md-content flex>
+        <md-toolbar layout="row"  layout-padding layout-align="start center">
+            <span flex ng-show="menuOpen"> <md-icon class="material-icons">menu</md-icon></span>
+            <span ng-show="!chatWindow">No Chat Open</span>
+            <span flex ng-show="chatWindow">Chat with {{currentChat.user.name || currentChat.user.id}}</span>
+        </md-toolbar>
+        <section layout-padding >
+            <p ng-show="!chatWindow"> Choose a user or group from the Left side menu to chat with them. </p>
+            <div ng-show="chatWindow"> You are chatting with {{currentChat.user.name || currentChat.user.id }}
+                <form layout="row"  flex name="message">
+                    <md-input-container flex>
+                        <label>Message</label>
+                        <input md-maxlength="150" name="Message" ng-model="currentChat.messages">
+                            </textarea>
+                        <div ng-messages="projectForm.clientName.$error">
+                        </div>
+                    </md-input-container>
+                    <md-button class="md-fab" aria-label="Send">
+                        <md-icon class="material-icons">send</md-icon>
+                    </md-button>
+                </form>
 
-    </body>
+            </div>
+        </section>
+    </md-content>
+</section>
+</body>
 </html>
 
