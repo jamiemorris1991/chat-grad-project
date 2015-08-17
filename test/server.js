@@ -2,7 +2,6 @@ var server = require("../server/server");
 var request = require("request");
 var assert = require("chai").assert;
 var sinon = require("sinon");
-
 var testPort = 52684;
 var baseUrl = "http://localhost:" + testPort;
 var oauthClientId = "1234clientId";

@@ -10,6 +10,8 @@ module.exports = function(port, db, githubAuthoriser) {
     var users = db.collection("users");
     var sessions = {};
 
+    var conversations = db.collection("conversations-jamiemorris1991");
+
     app.get("/oauth", function(req, res) {
         githubAuthoriser.authorise(req, function(githubUser, token) {
             if (githubUser) {
@@ -86,7 +88,31 @@ module.exports = function(port, db, githubAuthoriser) {
         });
     });
 
-    
+    app.get("/api/conversations", function (req, res) {
+        conversations.find().toArray(function(err, docs) {
+            if (!err) {
+                res.json(docs.map(function(conversation) {
+                    return {
+                        user: conversation.user,
+                        lastMessage: conversation.lastMessage,
+                        anyUnseen: conversation.anyUnseen
+                    };
+                }));
+            } else {
+                res.sendStatus(500);
+            }
+        });
+    });
+
+    app.post ("/api/conversations/:user", function(req, res) {
+        conversations.insert({
+            sent: req.params.date,
+            body : req.params.body,
+            seen: false,
+            from: req.session.user
+        });
+        res.sendStatus(201);
+    });
 
 
     return app.listen(port);

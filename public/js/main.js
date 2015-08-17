@@ -12,11 +12,16 @@
         $scope.chatWindow = false;
         $scope.currentChat = "";
 
+        $scope.messageBody = "";
+
         $http.get("/api/user").then(function(userResult) {
             $scope.loggedIn = true;
             $scope.user = userResult.data;
             $http.get("/api/users").then(function(result) {
                 $scope.users = result.data;
+            });
+            $http.get("/api/conversations").then(function(result) {
+                $scope.conversations = result.data;
             });
         }, function() {
             $http.get("/api/oauth/uri").then(function(result) {
@@ -33,6 +38,19 @@
             };
             $scope.chatWindow = true;
             $scope.currentChat = chatObj;
+        };
+        $scope.sendMessage = function(user, message) {
+            var message = $scope.messageBody;
+            var converstationID = user.id;
+            $http.post("api/conversations/" + converstationID, {
+                sent: new Date.valueOf(),
+                body: message,
+                seen : false,
+                to: converstationID,
+            }).then(function(result) {
+
+            });
+
         };
 
     });
