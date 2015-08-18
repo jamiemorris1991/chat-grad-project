@@ -12,64 +12,66 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
 </head>
-<body ng-controller="ChatController">
+<body ng-controller="conversationController">
 <md-button class="md-raised md-primary" ng-show="!loggedIn" href="{{loginUri}}">Log in</md-button>
-<section ng-show="loggedIn" layout="row">
-    <md-sidenav class="site-sidenav md-sidenav-left md-whiteframe-z3  ng-isolate-scope md-locked-open md-closed" md-component-id="left" md-is-locked-open="$mdMedia('gt-md')">
+<section ng-show="loggedIn" layout="row"  ng-controller="AppCtrl">
+    <md-sidenav class="site-sidenav md-sidenav-left md-whiteframe-z3  ng-isolate-scope md-locked-open" md-component-id="left" md-is-locked-open="$mdMedia('gt-md')" md-component-id="left" md-is-locked-open="$mdMedia('gt-md')">
         <md-toolbar>
             <header layout="row" class="nav-header">
-                <h1>Logged in as {{user.name }}</h1>
+                <p>Logged in as {{user.name }}</p>
             </header>
         </md-toolbar>
         <md-content layout="column" flex class="md-default-theme">
-            <md-tabs class="md-primary" md-border-bottom>
-                <md-tab label="Users" layout="row">
-                    <md-subheader class="md-primary">List of registered users</md-subheader>
-                    <md-content layout="column">
-                        <md-list>
-                            <md-list-item ng-repeat="user in users" ng-click="openChat(user)" class="md-2-line repeated-item" flex>
-                                <img ng-src="{{user.avatarUrl}}" class="md-avatar" alt="{{user.name || user.id}}" />
-                                <div class="md-list-item-text">
-                                    <h4>{{user.name || user.id}}</h4>
-                                    <p>Last Message Text</p>
-                                </div>
-                                <md-divider md-inset></md-divider>
-                            </md-list-item>
-                        </md-list>
-                    </md-content>
-                </md-tab>
-                <md-tab label="Chats">
-                    <md-subheader class="md-primary">Active Chats</md-subheader>
-                    <md-list>
-                        <md-list-item ng-repeat="conversation in conversations" ng-click="openChat(conversation.user)" class="md-2-line repeated-item">
-                            <img ng-src="{{conversation.user.avatarUrl}}" class="md-avatar"/>
-                            <div class="md-list-item-text">
-                                <h4>{{conversation.user.name ||conversation.user.id}}</h4>
-                                <p>Last Message Text</p>
-                            </div>
-                            <md-divider md-inset ng-if="!$last"></md-divider>
-                        </md-list-item>
-                    </md-list>
-                </md-tab>
-            </md-tabs>
-        </md-content>
+            <md-content layout="column">
+                <md-list>
+                    <md-subheader class="md-primary">Active conversations</md-subheader>
+                    <md-list-item ng-repeat="conversation in conversations" ng-click="openConversation(conversation.user)" class="md-2-line repeated-item">
+                        <img ng-src="{{conversation.user.avatarUrl}}" class="md-avatar"/>
+                        <div class="md-list-item-text" >
+                            <h4>{{conversation.user.name  || conversation.user.id}}</h4>
+                            <p>Last Message {{convsersation.message.sent | date:' HH:mm:ss dd-MM-yyyy'}}</p>
+                        </div>
+                        <md-divider md-inset ng-if="!$last"></md-divider>
+                    </md-list-item>
+                </md-list>
+                <md-list>
+                    <md-subheader class="md-primary">All users</md-subheader>
+                    <md-list-item ng-repeat="user in users" ng-click="openConversation(user)" class="md-2-line repeated-item" flex>
+                        <img ng-src="{{user.avatarUrl}}" class="md-avatar" alt="{{user.name || user.id}}" />
+                        <div class="md-list-item-text">
+                            <h4>{{user.name || user.id}}</h4>
+                            <p>Last Message </p>
+                        </div>
+                        <md-divider md-inset></md-divider>
+                    </md-list-item>
+                </md-list>
+            </md-content>
     </md-sidenav>
     <md-content flex>
         <md-toolbar layout="row"  layout-padding layout-align="start center">
-            <span flex ng-show="menuOpen"> <md-icon class="material-icons">menu</md-icon></span>
-            <span ng-show="!chatWindow">No Chat Open</span>
-            <span flex ng-show="chatWindow">Chat with {{currentChat.user.name || currentChat.user.id}}</span>
+            <md-button ng-click="toggleLeft()" class="md-white" hide-gt-md>
+                <md-icon class="material-icons">menu</md-icon>
+            </md-button>
+            <span ng-show="!conversationWindow">No Chat Open</span>
+            <span flex ng-show="conversationWindow">Chat with {{currentConversation.user.name || currentConversation.user.id}}</span>
         </md-toolbar>
         <md-content layout-padding >
-            <p ng-show="!chatWindow"> Choose a user or group from the Left side menu to chat with them. </p>
-            <div ng-show="chatWindow"> You are chatting with {{currentChat.user.name || currentChat.user.id }}
-                <form layout="row" ng-submit="sendMessage(currentChat.user)" flex name="message">
+            <p ng-show="!conversationWindow"> Choose a user or group from the Left side menu to chat with them. </p>
+            <div ng-show="conversationWindow">
+                <md-list>
+                    <md-list-item ng-repeat="message in currentConversation.messages" class="md-3-line repeated-item">
+                        <img ng-src="{{message.sender.avatarUrl}}" class="md-avatar" alt="{{user.name || user.id}}" />
+                        <div class="md-list-item-text">
+                            <h3>{{message.body}}</h3>
+                            <p class="md-caption"> {{message.sender.name || message.sender.id}}  at {{message.sent | date:' HH:mm:ss dd-MM-yyyy'}}</p>
+                        </div>
+                    </md-list-item>
+                </md-list>
+                <form layout="row" ng-submit="sendMessage(currentConversation)" flex>
                     <md-input-container flex>
                         <label>Message</label>
-                        <input md-maxlength="150" name="Message" ng-model="currentChat.messages" ng-model="messageBody">
+                        <input md-maxlength="150" name="newMessage" ng-model="currentConversation.currentMessage">
                         </textarea>
-                        <div ng-messages="projectForm.clientName.$error">
-                        </div>
                     </md-input-container>
                     <md-button class="md-fab" aria-label="Send">
                         <md-icon class="material-icons">send</md-icon>

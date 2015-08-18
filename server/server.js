@@ -1,16 +1,17 @@
 var express = require("express");
 var cookieParser = require("cookie-parser");
+var bodyParser = require("body-parser");
 
 module.exports = function(port, db, githubAuthoriser) {
     var app = express();
 
     app.use(express.static("public"));
     app.use(cookieParser());
+    app.use(bodyParser.json());
 
     var users = db.collection("users");
-    var sessions = {};
-
     var conversations = db.collection("conversations-jamiemorris1991");
+    var sessions = {};
 
     app.get("/oauth", function(req, res) {
         githubAuthoriser.authorise(req, function(githubUser, token) {
@@ -89,7 +90,9 @@ module.exports = function(port, db, githubAuthoriser) {
     });
 
     app.get("/api/conversations", function (req, res) {
-        conversations.find().toArray(function(err, docs) {
+        conversations.find({
+            between: req.session.user
+        }).toArray(function(err, docs) {
             if (!err) {
                 res.json(docs.map(function(conversation) {
                     return {
@@ -104,16 +107,39 @@ module.exports = function(port, db, githubAuthoriser) {
         });
     });
 
+    app.get("/api/conversations/:user", function(req, res) {
+        var theirId = req.params.user;
+        var myId = req.session.user;
+
+        conversations.find({
+            between: {
+                $all: [theirId, myId]
+            }
+        }).toArray(function(err, docs) {
+            if (!err) {
+                docs = docs.sort({sent: -1});
+                res.json(docs.map(function(message) {
+                    return {
+                        from: message.between[0],
+                        sent: message.sent,
+                        body: message.body,
+                        seen: message.seen || false
+                    };
+                }));
+            }else {
+                res.status(500);
+            }
+        });
+    });
+
     app.post ("/api/conversations/:user", function(req, res) {
         conversations.insert({
             sent: req.params.date,
             body : req.params.body,
             seen: false,
-            from: req.session.user
         });
         res.sendStatus(201);
     });
-
 
     return app.listen(port);
 };
